@@ -8,7 +8,8 @@ ENV OWA_UID="82" \
     OWA_USER="www-data" \
     OWA_GID="82" \
     OWA_GROUP="www-data" \
-    WEBROOT_DIR=/var/www/html
+    WEBROOT_DIR=/var/www/html \
+    OWA_DB_TYPE = "mysql"
 
 # Add OWA configuration
 ADD config /tmp/owa-config
@@ -61,7 +62,18 @@ RUN set -ex \
     && chown -R $OWA_USER:$OWA_GROUP $WEBROOT_DIR/ \
     && chmod -R 0775 $WEBROOT_DIR/ \
     && apk del jq \
-    && rm -rf /var/cache/apk/* /tmp/owa.tar.gz /tmp/owa-config 
+    && rm -rf /var/cache/apk/* /tmp/owa.tar.gz /tmp/owa-config \
+    && sed -i "s|'OWA_DB_TYPE',\s*.*|'OWA_DB_TYPE', '${OWA_DB_TYPE}');|g" /var/www/html/owa-config-dist.php \
+    && sed -i "s|'OWA_DB_NAME',\s*.*|'OWA_DB_NAME', '${OWA_DB_NAME}');|g" /var/www/html/owa-config-dist.php \
+    && sed -i "s|'OWA_DB_HOST',\s*.*|'OWA_DB_HOST', '${OWA_DB_HOST}');|g" /var/www/html/owa-config-dist.php \
+    && sed -i "s|'OWA_DB_USER',\s*.*|'OWA_DB_USER', '${OWA_DB_USER}');|g" /var/www/html/owa-config-dist.php \
+    && sed -i "s|'OWA_DB_PASSWORD',\s*.*|'OWA_DB_PASSWORD', '${OWA_DB_PASSWORD}');|g" /var/www/html/owa-config-dist.php \
+    && sed -i "s|'OWA_PUBLIC_URL',\s*.*|'OWA_PUBLIC_URL', '${OWA_PUBLIC_URL}');|g" /var/www/html/owa-config-dist.php \
+    && sed -i "s|'OWA_NONCE_KEY',\s*.*|'OWA_NONCE_KEY', '${OWA_NONCE_SALT}');|g" /var/www/html/owa-config-dist.php \
+    && sed -i "s|'OWA_NONCE_SALT',\s*.*|'OWA_NONCE_SALT', '${OWA_NONCE_SALT}');|g" /var/www/html/owa-config-dist.php \
+    && sed -i "s|'OWA_AUTH_KEY',\s*.*|'OWA_AUTH_KEY', '${OWA_AUTH_KEY}');|g" /var/www/html/owa-config-dist.php \
+    && sed -i "s|'OWA_AUTH_SALT',\s*.*|'OWA_AUTH_SALT', '${OWA_AUTH_SALT}');|g" /var/www/html/owa-config-dist.php \
+    && mv -f /var/www/html/owa-config-dist.php /var/www/html/owa-config.php
 
 WORKDIR $WEBROOT_DIR
 EXPOSE 80 443
